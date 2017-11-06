@@ -86,7 +86,7 @@ def center_Screen(screen, im):
 pygame.init()
 screen = pygame.display.set_mode([800,600])
 screen.fill(Noir)
-pygame.display.set_caption("Hit leSlash")
+pygame.display.set_caption("Hit le Slash")
 background = pygame.image.load(background_image).convert()
 scrWidth, scrHeight = screen.get_size()
 Huge_Font = pygame.font.Font('brothers_of_metal.ttf', 45)
@@ -161,7 +161,7 @@ def introduction():
 
         screen.fill(Blanc)
         Big_Text = pygame.font.Font("metal lord.ttf", 55)
-        Txt_Surf, Txt_Rect = text_objects("Hit LeSlash", Big_Text)
+        Txt_Surf, Txt_Rect = text_objects("Hit Le Slash", Big_Text)
         Txt_Rect.center = ((scrWidth / 2), (scrHeight / 2))
         screen.blit(Txt_Surf, Txt_Rect)
 
