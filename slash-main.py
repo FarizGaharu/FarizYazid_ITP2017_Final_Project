@@ -14,7 +14,7 @@ Improved by Fariz Ihsan Yazid/FarizGaharu
         version 0.9A
 '''
 
-import pygame, random
+import pygame, random, os
 from pygame.locals import *
 from pygame.font import *
 
@@ -86,23 +86,35 @@ def center_Screen(screen, im):
 pygame.init()
 screen = pygame.display.set_mode([800,600])
 screen.fill(Noir)
-pygame.display.set_caption("Hit le Slash")
+pygame.display.set_caption("Hit leSlash")
 background = pygame.image.load(background_image).convert()
 scrWidth, scrHeight = screen.get_size()
 Huge_Font = pygame.font.Font('brothers_of_metal.ttf', 45)
 
+'''zero = 0
+if not os.path.exists("score_save.dat"):
+    write_into_file = open("score_save.dat", 'w')
+    write_into_file.write(str(zero))
+    write_into_file.close()
+read_into_file = open("score_save.dat")
+top_score = int(read_into_file.readline())
+read_into_file.close()
 
-#hide the mouse cursor
+def score_point(screen, data, x, y, input_font_size, input_message_form):
+    fonts = pygame.font.SysFont(None, input_font_size)
+    txt = fonts.render(input_message_form%data, True, Noir)
+    screen.blit(txt, (x, y))'''
 
 
 font = pygame.font.Font(None, 30)
 
 hitSnd = pygame.mixer.Sound('Ha_01.wav')
-hitSnd.set_volume(1)
+hitSnd.set_volume(0.5)
 
 # create sprites and a group
 mole = Slash()
 hammer = Smasher()
+#pause = False
 
 # game variables
 mousePos = (scrWidth/2, scrHeight/2)
@@ -136,7 +148,7 @@ def button(msg,x,y,w,h,ic,ac,action=None):
         pygame.draw.rect(screen, ac,(x,y,w,h))
 
         if click[0] == 1 and action != None:
-             action()
+            action()
     else:
         pygame.draw.rect(screen, ic,(x,y,w,h))
 
@@ -166,15 +178,44 @@ def introduction():
         screen.blit(Txt_Surf, Txt_Rect)
 
 
-        button("Start!", scrWidth/2, scrHeight/2 + 100, 110, 55, Vert, VertBrillant, main)
-        button("Quit", scrWidth/2, scrHeight/2 - 100, 110, 55, Bleu,BleuBrillant, quit)
+        button("Start!", scrWidth*0.45, scrHeight*0.45 + 100, 110, 55, Vert, VertBrillant, game_run)
+        button("Quit", scrWidth*0.45, scrHeight*0.45 + 200, 110, 55, Bleu,BleuBrillant, quit)
 
         pygame.display.update()
         clock.tick(100)
 
+def pause_game():
+    global pause
+    #global topScore
+    pygame.mouse.set_visible(True)
+    while pause:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+        screen.fill(Blanc)
+        big_text = pygame.font.Font('brothers_of_metal.ttf',110)
+        Txt_Surf, Txt_Rect = text_objects('Paused', big_text)
+        Txt_Rect.center =((scrWidth/2), (scrHeight/2))
+        screen.blit(Txt_Surf, Txt_Rect)
+
+
+        button('Continue', scrWidth*0.45, scrHeight*0.45 + 100, 110, 55, Vert, VertBrillant, game_run)
+        button('Quit', scrWidth*0.45, scrHeight*0.45 + 200, 110, 55, Bleu, BleuBrillant, quit)
+
+        pygame.display.update()
+        clock.tick(60)
+
+# Score
+def score_point(screen, data, x, y, input_txt_colour, input_font,input_font_size, input_message_format = 'Hit: %d'):
+    fonts = pygame.font.Font(input_font, input_font_size)
+    text = fonts.render(input_message_format%data, True, input_txt_colour)
+    screen.blit(text, (x, y))
+
 
 #in game concept
-def main():
+def game_run():
+    global pause
     init_time = pygame.time.get_ticks() #init_time, how long the game has run since it started
     running = True
     score = 0
@@ -186,18 +227,17 @@ def main():
 
         # handle events
         for event in pygame.event.get():
-            if event.type == QUIT:
-                running = False
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
+                if event.key == pygame.K_p:
+                    pause = True
+                    pause_game()
+                    running = True
             if event.type == MOUSEMOTION:
                 mousePos = pygame.mouse.get_pos()
             if event.type == MOUSEBUTTONDOWN:
                 running = True
 
         # update game
-
         hammer.update(pygame.mouse.get_pos())
         ev = pygame.event.wait()
         if ev.type == QUIT:
@@ -217,17 +257,22 @@ def main():
         if (pygame.time.get_ticks() - init_time) >= 20000:
             temp = pygame.time.get_ticks()
             if score < 20:
-                while pygame.time.get_ticks() - temp <= 5000: #wait 5000 ms == 5 sec
+                while pygame.time.get_ticks() - temp <= 6000: #wait 5000 ms == 5 sec
                     screen.fill(Noir)
                     lose = Huge_Font.render("Slash Got away, You Lose! ", True, Blanc)
                     center_Screen(screen, lose)
                     pygame.display.update()
+                    '''if score > top_scores:
+                            write_into_files = open('point_save.dat','w')
+                            write_into_files.write(str(score))
+                            write_into_files.close()
+                            top_scores = score'''
                 else:
                     print("0: Hah!, You Lose")
                     introduction()
             else:
 
-                while pygame.time.get_ticks()-temp <= 5000: #wait 5000ms
+                while pygame.time.get_ticks()-temp <= 6000: #wait 5000ms
                     screen.fill(Blanc)
                     win = Huge_Font.render("Slash is down, You Win!", True, Noir)
                     center_Screen(screen, win)
@@ -236,19 +281,22 @@ def main():
                     print("0: You Win!")
                     introduction()
 
-# -------------------------------------------------
-        # redraw game
+        # redraw game background, (0, 0))
+
         screen.blit(background, (0, 0))
-        mole.draw(screen)
-        hammer.draw(screen)
+
 
         # time elapsed (in secs)
+        mole.draw(screen)
+        hammer.draw(screen)
         time = int((pygame.time.get_ticks() - init_time)/1000)
         timeIm = font.render(str(time), True, Blanc)
-        screen.blit(timeIm, (10,10))
 
         hitIm = font.render("Hits = " + str(score), True, Blanc)
         center_Image(screen, hitIm)
+
+
+        screen.blit(timeIm, (10,10))
 
         pygame.display.update()
         clock.tick(80)
