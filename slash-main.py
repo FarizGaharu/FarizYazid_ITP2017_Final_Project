@@ -205,6 +205,7 @@ def pause_game():
 
 
 #in game concept
+#return game is playing
 def game_run():
     global saved_topScore
     init_time = pygame.time.get_ticks() #init_time, how long the game has run since it started
